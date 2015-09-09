@@ -60,3 +60,4 @@ CLOSE STREAM AND COM PORT
 stream.stop_stream()
 stream.close()
 ser.close()
+print("TEST")
