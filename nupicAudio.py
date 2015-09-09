@@ -27,6 +27,7 @@ See README.md for details.
 numpy - the language of pyaudio (& everything else)
 pyaudio - access to the mic via the soundcard
 pyplot - to plot the sound frequencies
+os - to have priority
 bitmaparray - encodes an array of indices into an SDR
 TP10X2 - the C++ optimized temporal pooler (TP)
 """
@@ -133,10 +134,8 @@ class AudioStream:
 
     """
     Sampling details
-     rate: The sampling rate in Hz of my soundcard
+     rate: The sampling rate in Hz of SYBA USB C Media soundcard
      buffersize: The size of the array to which we will save audio segments (2^12 = 4096 is very good)
-     secToRecord: The length of each sampling
-     buffersToRecord: how many multiples of buffers are we recording?
     """
     rate=48000
     self.buffersize=2**12
@@ -283,7 +282,7 @@ class AudioStream:
     Use numpy's FFT (numpy.fft.fft)
     Find the magnitude of the complex numbers returned (abs value)
     Split the FFT array in half, because we have mirror frequencies
-     (they're the complex conjugates)
+     (they're the complex conjugates) ' does not matter because we take a section using the bandpass
     Use just the first half to apply the bandpass filter
 
     Great info here: http://stackoverflow.com/questions/4364823/how-to-get-frequency-from-fft-result
