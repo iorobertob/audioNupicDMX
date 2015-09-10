@@ -220,8 +220,7 @@ class AudioStream:
     
     while True:
       try:
-        while True:
-          self.processAudio()
+        self.processAudio()
 
       except KeyboardInterrupt:
         
@@ -229,7 +228,7 @@ class AudioStream:
         self.inStream.close()      
         p.terminate()        
         plt.close()
-        print("* killed audio")
+        print("* Killed Audio Stream")
         quit()
         pass
   
