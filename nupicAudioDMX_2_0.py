@@ -1,3 +1,14 @@
+#-------------------------------------------------------------------------------
+# Name:        nupicAudioDMX_2_0
+# Purpose:
+#
+# Author:      IO - Code
+#
+# Created:     05/10/2015
+# Copyright:   (c) IO - Code 2015
+# License:     see License.txt
+#-------------------------------------------------------------------------------
+
 #!/usr/bin/env python
 # ----------------------------------------------------------------------
 # Numenta Platform for Intelligent Computing (NuPIC)
