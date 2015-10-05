@@ -176,14 +176,13 @@ class AudioStream:
     self.lowpass = min(int(lowHertz * self.buffersize / rate), self.buffersize/2 - 1)
     
     """
-    Creting the audio stream from our mic
+    Creting the audio stream from our mic, Callback Mode.
     """
     p = pyaudio.PyAudio()
     width = 2#8 BIT
     
     def callback(in_data,frame_count, time_info, status):
-        self.audio = numpy.fromstring(in_data,dtype=numpy.int16)
-        
+        self.audio = numpy.fromstring(in_data,dtype=numpy.int16)        
         return (self.audio, pyaudio.paContinue)
     
     self.inStream = p.open(format = p.get_format_from_width(width, unsigned=False),
@@ -217,7 +216,7 @@ class AudioStream:
       pamLength      =100)
 
 
-    #initialise anomaly#
+    #initialise anomaly
     self.anomaly = 0
     self.anomalyGrad = 127;
 
@@ -232,7 +231,7 @@ class AudioStream:
     print "Bin difference:\t\t" + str(self.lowpass - self.highpass)
     print "Hz per Bin:\t\t" + str(rate/self.buffersize)
     print "Buffersize:\t\t" + str(self.buffersize)
-    #sys.exit()
+    
     """
     Setup the plot
      Use the bandpass filter frequency range as the x-axis
@@ -243,31 +242,28 @@ class AudioStream:
   
     plt.ion()         #interactive mode on
     
-    self.xAxis = 500
+    self.xAxis = 500  #Width of plt. 
     
-    plt.subplot(311)  #firs location of a 2 x 1 plots grid.
-    self.freqPlot = plt.plot(xs,xs,'r')[0]
-    plt.ylim(0,100000)#for negative dB values only.
+    plt.subplot(311)  #firs location of a 2 x 1 plots gri - Frequency Spectrum
+    self.freqPlot = plt.plot(xs,xs,'r')[0] 
+    plt.ylim(0,100000)
   
-    plt.subplot(312)  #second plot
+    plt.subplot(312)  #second plot - Time Signal Scroll. 
     self.timePlot = plt.plot(range(0,self.xAxis),range(0,self.xAxis),'g')[0]
     plt.ylim(-10000,10000)
 
-    plt.subplot(313)  #location of next plot.
+    plt.subplot(313)  #location of next plot - Anomaly Scroll. 
     self.anomalyPlot = plt.plot(range(0,self.xAxis),range(0,self.xAxis),'b')[0]
     plt.ylim(-10,300.0)
-    
-    
+       
   
     """
     Initialise deque arrays to append anomaly and audio values to
     """
-    self.anomalyValues = deque([0.0]*self.xAxis,maxlen=self.xAxis)#[]   #Buffer to hold anomaly values
-    #self.anomalyValues.append(deque([0.0]*4096, maxlen=4086))
+    self.anomalyValues = deque([0.0]*self.xAxis,maxlen=self.xAxis)# Buffer to hold anomaly values - Use collections.deque high performance holders.
     
     self.timeAudioValues = deque([0.0]*self.xAxis,maxlen=self.xAxis)   #To hold time audio values and display them.
-    #self.timeAudioValues.append(deque([0.0]*4096, maxlen=4086))
-    
+  
 
     """
     Start the Audio Thread.
@@ -347,43 +343,35 @@ class AudioStream:
     #print self.vis.hashtagAnomaly(self.anomaly)
     
     self.freqPlot.set_ydata(ys)# Plot the Frequency Spectrum
-    
+
+    # Plot the TimeScale of the Audio in a scroll, by shifting to the right and filling last element.
     self.timeAudioValues.rotate(-1)
     self.timeAudioValues[self.xAxis -1] = self.audio[1]
-    self.timePlot.set_ydata(self.timeAudioValues)# Plot the TimeScale of the Audio
+    self.timePlot.set_ydata(self.timeAudioValues)
     
-    
+    # Normalize anomaly from 0 to 255, integers only. 
     self.anomaly = int(self.anomaly * 255)
-    self.anomalyValues.rotate(-1)
-    if(self.anomaly  > self.anomalyValues[self.xAxis-2]):
-        self.anomalyValues[self.xAxis -1] = self.anomalyValues[self.xAxis -2] + 2.0
-        if(self.anomalyValues[self.xAxis-1] > 255):
-            self.anomalyValues[self.xAxis-1]= 255
-    else:
-        self.anomalyValues[self.xAxis -1] = self.anomalyValues[self.xAxis -2] - 2.0
-        if(self.anomalyValues[self.xAxis-1] < 0):
-            self.anomalyValues[self.xAxis-1] = 0
-  
-  
-    self.anomalyValues[499] =  self.anomaly
-    self.anomalyValues[499] =  (self.anomalyValues[499] + self.anomalyValues[498] + self.anomalyValues[497] + self.anomalyValues[496])/4
+
+    #Shift anomalyValues array (for scrolling) to the right, and fill the last element with new Anomaly value.
+    self.anomalyValues.rotate(-1)    
+    self.anomalyValues[xAxis-1] =  self.anomaly
+    # 4 pole moving average, so smooth changes in Anomaly values
+    self.anomalyValues[xAxis-1] =  (self.anomalyValues[xAxis-1] + self.anomalyValues[xAxis-2]] + self.anomalyValues[xAxis-3]] + self.anomalyValues[xAxis-4]])/4
     self.anomalyPlot.set_ydata(self.anomalyValues)
 
-    #print "Value of Anomaly: " + str(self.anomalyValues[499])
+    #print "Value of Anomaly: " + str(self.anomalyValues[xAxis-1])
     
     self.counterTime += 1
-    #only every 200 times
-    if (self.counterTime > 10):
-    
+    #Update only every 200 times
+    if (self.counterTime > 10):    
         plt.show(block = False)
         plt.draw()
         self.counterTime = 0
 
+    #Pass anomaly value to the DMX Thread.
     pool.acquire()
     anomaly = int(self.anomalyValues[self.xAxis-1])
     pool.release()
-
-    #print "Anomaly:\t\t" + str(self.anomaly)
 
 
   def fft(self, audio, highpass, lowpass):
@@ -409,14 +397,15 @@ class AudioStream:
     return output
 
 
-"""
- D M X  Class for Enttec USB Pro serial porotocol.
- Select the name of the usb port, use baud rate of 57600
- fills an array with the Enteec protocol, 512 channels,
- taking the anomaly value from the Main Thread and using it 
- as chanell value.
-"""
+
 class pydmx(threading.Thread):
+    """
+    D M X  Class for Enttec USB Pro serial porotocol.
+    Select the name of the usb port, use baud rate of 57600
+    fills an array with the Enteec protocol, 512 channels,
+    taking the anomaly value from the Main Thread and using it 
+    as chanell value.
+    """
     def __init__(self, semaphore, port_number = "/dev/tty.usbserial-EN169205"):
 
 
@@ -525,11 +514,7 @@ class pydmx(threading.Thread):
             global anomaly
             self.anomaly = anomaly
             self.semaphore.release()
-            
-            #temp = int(temp * 255)
-            
-            #print 'lock acquired dmx task. Anomaly'
-            
+                        
             ##Set all channels with desired values
             ##this function will only update the buffer
             ##will not update the output in the Enttec device
@@ -550,6 +535,10 @@ class pydmx(threading.Thread):
         self.blackout()
         self.close_serial()
 
+
+"""
+Entrance to program
+"""
 audiostream = AudioStream()
 
 
