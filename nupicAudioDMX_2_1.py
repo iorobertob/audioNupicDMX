@@ -546,4 +546,4 @@ class pydmx(threading.Thread):
 """
 Entrance to program
 """
-audiostream = AudioStream()
+audiostream = AudioStream() 
