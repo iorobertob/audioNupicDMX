@@ -365,9 +365,9 @@ class AudioStream:
 
     #Shift anomalyValues array (for scrolling) to the right, and fill the last element with new Anomaly value.
     self.anomalyValues.rotate(-1)    
-    self.anomalyValues[xAxis-1] =  self.anomaly
+    self.anomalyValues[self.xAxis -1] =  self.anomaly
     # 4 pole moving average, so smooth changes in Anomaly values
-    self.anomalyValues[xAxis-1] =  (self.anomalyValues[xAxis-1] + self.anomalyValues[xAxis-2]] + self.anomalyValues[xAxis-3]] + self.anomalyValues[xAxis-4]])/4
+    self.anomalyValues[self.xAxis-1] =  (self.anomalyValues[self.xAxis-1] + self.anomalyValues[self.xAxis-2] + self.anomalyValues[self.xAxis-3] + self.anomalyValues[self.xAxis-4])/4
     self.anomalyPlot.set_ydata(self.anomalyValues)
 
     #print "Value of Anomaly: " + str(self.anomalyValues[xAxis-1])
