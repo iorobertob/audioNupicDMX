@@ -1,4 +1,4 @@
-#-------------------------------------------------------------------------------
+#-----------------------------------------------------------------------
 # Name:        nupicAudioDMX_2_0
 # Purpose:
 #
@@ -7,7 +7,7 @@
 # Created:     05/10/2015
 # Copyright:   (c) IO - Code 2015
 # License:     see License.txt
-#-------------------------------------------------------------------------------
+#-----------------------------------------------------------------------
 
 #!/usr/bin/env python
 # ----------------------------------------------------------------------
@@ -144,12 +144,10 @@ class Visualizations:
         plt.legend(bbox_to_anchor=(0.5, 0.75, 0.5, .1), loc=3, mode="expand", borderaxespad=0.)
         plt.ylim(0,100000)
 
-
         plt.subplot(312)  #second plot - Time Signal Scroll.
         self.timePlot = plt.plot(range(0,self.xAxis),range(0,self.xAxis),'g', label="Time Audio")[0]
         plt.legend(bbox_to_anchor=(0.5, 0.75, 0.5, .1), loc=3, mode="expand", borderaxespad=0.)
         plt.ylim(-5000,5000)
-
 
         plt.subplot(313)  #location of next plot - Anomaly Scroll.
         self.anomalyPlot = plt.plot(range(0,self.xAxis),range(0,self.xAxis),'b', label="Anomaly in Time")[0]
@@ -165,19 +163,23 @@ class Visualizations:
         """
         binAmplitue = audio.ys[20]
 
-
+        """
+        Plot the Amplitude of the Frequency Bin, or Bins as scroll, shift vector and insert value at end, then plot.
+        """
         self.binValues1.rotate(-1)
         self.binValues1[self.xAxis -1] = binAmplitude
-        self.freqPlot.set_ydata(self.binValues1)# Plot the Frequency Spectrum
-                                           
-        # Plot the TimeScale of the Audio in a scroll, by shifting to the right and filling last element.
+        self.freqPlot.set_ydata(self.binValues1)                                           
+        
+        """
+        Plot the Amplitude of the Audio Signal as scroll, shift vector and insert value at end, then plot.
+        """
         self.timeAudioValues.rotate(-1)
         self.timeAudioValues[self.xAxis -1] = audio.audio[1]
-        self.timePlot.set_ydata(self.timeAudioValues)
-                                                   
-        
-                                                   
-         #Shift anomalyValues array (for scrolling) to the right, and fill the last element with new Anomaly value.
+        self.timePlot.set_ydata(self.timeAudioValues)                                                       
+          
+        """
+        Plot the Anomaly Value as scroll, shift vector and insert value at end, then plot.
+        """ 
         self.anomalyValues.rotate(-1)
         self.anomalyValues[self.xAxis-1] =  anomaly
         # 4 pole moving average, so smooth changes in Anomaly values
@@ -241,7 +243,6 @@ class AudioStream:
         Creting the audio stream from our mic, Callback Mode.
         """
         p = pyaudio.PyAudio()
-
         
 
         """
@@ -285,27 +286,16 @@ class AudioStream:
         """
         self.ys = self.fft(self.audio, self.highpass, self.lowpass)
 
-
-        return self.ys
-        
-                                           
-                   
-                                                                                                                                           
+                                                                                                                                   
                                                                                                                                            
     def fft(self, audio, highpass, lowpass):
             """
             Fast fourier transform conditioning
             Output:
             'output' contains the strength of each frequency in the audio signal
-            frequencies are marked by its position in 'output':
-            frequency = index * rate / buffesize
-            output.size = buffersize/2
+            frequencies are marked by its position in 'output'
             Method:
             Use numpy's FFT (numpy.fft.fft)
-            Find the magnitude of the complex numbers returned (abs value)
-            Split the FFT array in half, because we have mirror frequencies
-            (they're the complex conjugates)
-            Use just the first half to apply the bandpass filter
             Great info here: http://stackoverflow.com/questions/4364823/how-to-get-frequency-from-fft-result
             """
             left = numpy.abs(numpy.fft.fft(audio))
