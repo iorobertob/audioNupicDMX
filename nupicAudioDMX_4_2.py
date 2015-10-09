@@ -550,4 +550,4 @@ class pydmx(threading.Thread):
 """
 Entrance to program
 """
-nupicaudioDMX = Main() 
+nupicAudioDMX = Main() 
