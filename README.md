@@ -23,6 +23,7 @@ $ python AND_6.py
 ## hardware Requirements
 
 *[Enttec DMX USB Pro](https://www.enttec.com/?main_menu=Products&pn=70304&show=description)
+* Find the name of the current connected controller by typing in Terminal: ls /dev/tty.*
 
 *A microphone input
 
