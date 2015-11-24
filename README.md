@@ -1,6 +1,10 @@
 ![Alt text](https://cloud.githubusercontent.com/assets/11702381/11360485/cb342456-9239-11e5-9c1d-c5068b68eb88.png "Optional title")
 
 # audioNupicDMX
-Take NuPic project of HTM and use it to analyse an audio stream, to later use the anomaly score to output DMX commands over USB.
+This work takes Audio from a Microphone, processes it with a Machine Learning algorithm in such way that Anomalies are detected in the sound. This anomalies are used to generate one single, or several values, ranging between 0 and 255 to send over a DMX bus in order to control lights on a custom fashion. The system is programmed in Python, and it uses version 2.7 specifically. 
 
-Work in progres: Note this is not the final code. Will update with finished work.
+Anomaly, referring to some values of the sound input that divert from what has been expected, or normal. 
+
+The Machine Learning algorithm used is a Hierarchical Temporal Memory (HTM) implemented in the project called NuPIC, from Numenta. This is an open source project found in this respository. NuPIC is the state of the art in computer models of the human brain, designed to work in the same way the Neocortex does. More about this in the NuPIC section. 
+
+The inspiration for this comes from a work by artist/cybernitician Gordon Pask called Musicolour, which took audio and gave visual output playing with concepts like learning machines, memory elements, repetitive input, and the reaction of the system to such repetitions, growing less reactive to repetition than to novel input. All this being analogue and here ported to contemporary digital technology and current machine learning systems. 
