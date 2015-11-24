@@ -5,7 +5,7 @@ This work takes Audio from a Microphone, processes it with a Machine Learning al
 
 Anomaly, referring to some values of the sound input that divert from what has been expected, or normal. 
 
-The Machine Learning algorithm used is a Hierarchical Temporal Memory (HTM) implemented in the project called NuPIC, from Numenta. This is an open source project found in this respository. [NuPIC](https://github.com/numenta/nupic)is the state of the art in computer models of the human brain, designed to work in the same way the Neocortex does. More about this in the NuPIC section. 
+The Machine Learning algorithm used is a Hierarchical Temporal Memory (HTM) implemented in the project called NuPIC, from Numenta. This is an open source project found in this respository. [NuPIC](https://github.com/numenta/nupic) is the state of the art in computer models of the human brain, designed to work in the same way the Neocortex does. More about this in the NuPIC section. 
 
 The inspiration for this comes from a work by artist/cybernitician Gordon Pask called Musicolour, which took audio and gave visual output playing with concepts like learning machines, memory elements, repetitive input, and the reaction of the system to such repetitions, growing less reactive to repetition than to novel input. All this being analogue and here ported to contemporary digital technology and current machine learning systems. 
 
