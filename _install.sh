@@ -46,7 +46,7 @@ brew install portaudio
 
 
 # Install PyAudio
-pip install PortAudio --user
+pip install pyaudio --user
 
 #Install PySerial
 pip install pySerial --user
