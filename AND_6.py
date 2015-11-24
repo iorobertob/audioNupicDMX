@@ -4,7 +4,7 @@
 #
 # Author:      IO - Code
 #
-# Created:     10/11/2015
+# Created:     23/11/2015
 # Copyright:   (c) IO - Code 2015
 # License:     see License.txt
 #-----------------------------------------------------------------------
@@ -47,7 +47,7 @@ pyplot - to plot the sound frequencies
 bitmaparray - encodes an array of indices into an SDR
 TP10X2 - the C++ optimized temporal pooler (TP)
 """
-import numpy #version
+import numpy 
 import random
 import pyaudio
 import os
@@ -55,8 +55,8 @@ import time
 import sys
 import serial
 import threading
-from Tkinter import *
 import ttk
+from Tkinter import *
 from collections import deque
 
 import matplotlib.pyplot as plt
@@ -71,7 +71,7 @@ from nupic.algorithms.anomaly_likelihood           import AnomalyLikelihood
 import model_params     #this has to by a python file in the same folder
 
 def destroy(e): sys.exit() # exit from the GUI
-
+os.nice(100)
 ########################################################################################################
 ########################################################################################################
 """
@@ -101,17 +101,19 @@ PAUSE               = 1
 
 class interface:
 
-    def on_closing():
-        print "Closing"
-        if messagebox.askokcancel("Quit", "Do you want to quit?"):
-            global modelRunning
-            MODEL_RUN  = 0
-            root.destroy()
-            
+               
 
     def __init__(self):
         nupicAudioDMX = Main() #4 bins 
         nupicAudioDMX.start()
+
+        def on_closing():
+            global MODEL_RUN
+            global PAUSE
+            print 'stopProgram'
+            PAUSE       = 0
+            MODEL_RUN   = 0
+            root.destroy()
 
         def stopProgram(*args):
             global MODEL_RUN
@@ -138,7 +140,7 @@ class interface:
 
                 DMX     = dmxVar.get()
                 PLOT    = plotVar.get()
-                HTM     = dmxVar.get()
+                HTM     = htmVar.get()
                 AUDIO   = audioVar.get()
 
                 START   = 1
@@ -161,15 +163,9 @@ class interface:
         plotVar     = IntVar()
         htmVar      = IntVar()
 
-        # ttk.Label(mainframe, textvariable=meters).grid(column=2, row=2, sticky=(W, E))
-
         ttk.Button(mainframe, text="Start", command=startProgram).grid(column=3, row=5, sticky=W)
         ttk.Button(mainframe, text="Pause", command=pauseProgram).grid(column=3, row=6, sticky=W)
         ttk.Button(mainframe, text="Stop" , command=stopProgram).grid(column=3, row=7, sticky=W)
-
-        # ttk.Label(mainframe, text="feet").grid(column=3, row=1, sticky=W)
-        # ttk.Label(mainframe, text="is equivalent to").grid(column=1, row=2, sticky=E)
-        # ttk.Label(mainframe, text="meters").grid(column=3, row=2, sticky=W)
 
         ttk.Checkbutton(mainframe, text="DMX",   variable=dmxVar).grid(column = 3, row=1, sticky=W)
         ttk.Checkbutton(mainframe, text="AUDIO", variable=audioVar).grid(column = 3, row=2, sticky=W)
@@ -180,7 +176,7 @@ class interface:
         for child in mainframe.winfo_children(): child.grid_configure(padx=5, pady=5)           
         
         root.bind('<Return>', startProgram)
-
+        root.protocol("WM_DELETE_WINDOW",on_closing)
         root.mainloop()
 
 
@@ -207,8 +203,8 @@ class nupicModels(threading.Thread):
             self.result     = self.model.run({"binAmplitude" : self.amplitude})
             self.anomaly    = self.result.inferences['anomalyScore']    
             self.likelihood = self.likelihoods.anomalyProbability(self.amplitude, self.anomaly) 
-
-            print 'Time taken Thread ' + str(self.number) + ': ' + format(time.time() - self.startTime)               
+            #print 'Anomaly Thread ' + str(self.number) + ": " + str(self.anomaly)
+            #print 'Time taken Thread ' + str(self.number) + ': ' + format(time.time() - self.startTime)               
             self.startTime = time.time()
 
         HTM = 0
@@ -468,12 +464,11 @@ class Main(threading.Thread):
         global HTM
         global PLOT
         global START
+        global AUDIO
         global MODEL_RUN
         global PAUSE
-
         
         while START == 0:1
-
 
         print'started'
         """
@@ -563,7 +558,7 @@ class Main(threading.Thread):
                                      
                     anomalyAv    = numpy.sum(anomaly)   /noBins
                     likelihoodAv = numpy.sum(likelihood)/noBins #Range expanded and clipped for DMX Lighting reasons!
-                    print "Anomaly : " + str(anomaly)
+                    #print "Anomaly : " + str(anomaly)
 
                     """             
                     DMX - Pass Likelihood value to the DMX Thread. Clip values below 0.
@@ -599,12 +594,12 @@ class Main(threading.Thread):
                                            
                 except KeyboardInterrupt:
                     MODEL_RUN  = 0
-                    print 'Trying to stop - Keyboard Interrupt'
+                    print 'Stop - Exception - Keyboard Interrupt'
                     pass
 
                 except Exception, err:
                     MODEL_RUN  = 0
-                    print 'Trying to stop - Exception, Error'
+                    print 'Stop - Exception - Error'
                     print err
                     pass
                 
@@ -708,7 +703,7 @@ class pydmx(threading.Thread):
         '''Send all 512 DMX Channels from channels[] to the hardware:
         update_channels()'''
         # This is where the magic happens
-        #print "dmx_usb.update_channels: Updating Anomaly:" + str(self.anomalyDMX)
+        # print "DMX Send Anomaly:" + str(self.anomalyDMX)
         self.int_data = [0] + self.channels
         self.msg_data = [chr(self.int_data[j]) for j in range(len(self.int_data))]
         self.transmit(self.OUTPUT_ONLY_SEND_DMX_LABEL, self.msg_data, len(self.msg_data))
@@ -757,4 +752,3 @@ class pydmx(threading.Thread):
 Entrance to program
 """
 GUI = interface()
-
