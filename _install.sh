@@ -42,7 +42,7 @@ sudo pip install pytest
 ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
 #Install PortAudio
-brew intall portaudio
+brew install portaudio
 
 
 # Install PyAudio
