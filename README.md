@@ -19,3 +19,10 @@ this should install all dependencies, clone this respository and set go into tha
 After that the main file AND_6.py can be called with:
 
 $ python AND_6.py
+
+## hardware Requirements
+
+[Enttec DMX USB Pro](https://www.enttec.com/?main_menu=Products&pn=70304&show=description)
+A microphone input
+A DMX Fixture.
+MAC OSX 10.10 Yosemite or higher
