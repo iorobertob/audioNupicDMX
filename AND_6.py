@@ -752,3 +752,4 @@ class pydmx(threading.Thread):
 Entrance to program
 """
 GUI = interface()
+
