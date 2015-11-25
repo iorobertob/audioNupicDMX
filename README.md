@@ -12,6 +12,7 @@ The inspiration for this comes from a work by artist/cybernitician Gordon Pask c
 ## to Install
 Copy only the _install.sh file, run it within the folder you want to work in by typing
 
+$ modch a+x _install.sh
 $ ./_install.sh
 
 this should install all dependencies, clone this respository and set go into that folder with the terminal. 
