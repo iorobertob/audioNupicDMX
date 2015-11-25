@@ -96,16 +96,20 @@ AUDIO               = 1
 START               = 0
 MODEL_RUN           = 1
 PAUSE               = 1
+GATE                = 40
 #######################################################################################################
 #######################################################################################################
 
 class interface:
 
-               
 
     def __init__(self):
         nupicAudioDMX = Main() #4 bins 
         nupicAudioDMX.start()
+
+        def gateControl(*args):
+            global GATE 
+            GATE = int(gateEntry.get())
 
         def on_closing():
             global MODEL_RUN
@@ -114,6 +118,7 @@ class interface:
             PAUSE       = 0
             MODEL_RUN   = 0
             root.destroy()
+            sys.exit()
 
         def stopProgram(*args):
             global MODEL_RUN
@@ -130,31 +135,44 @@ class interface:
 
 
         def startProgram(*args):
-            try:        
+            try:  
+                print 'Simon'      
                 global PLOT     
                 global DMX
                 global HTM
                 global AUDIO
                 global START
                 global PAUSE
+                global indexes
 
                 DMX     = dmxVar.get()
                 PLOT    = plotVar.get()
                 HTM     = htmVar.get()
                 AUDIO   = audioVar.get()
+                
+                indexes     = [
+                    int(int(f1.get())/freqPerBin),
+                    int(int(f2.get())/freqPerBin),
+                    int(int(f3.get())/freqPerBin),
+                    int(int(f4.get())/freqPerBin),
+                    ]
+
 
                 START   = 1
                 PAUSE   = 1
-                print 'start'
+                print 'Start Program'
+                print 'Frequencies to Analyse:'
+                print f1.get() + " Hz, " + f2.get() + " Hz, " + f3.get() + " Hz, and " + f4.get() + " Hz."
                             
             except:
-                pass
-        
+                pass 
+
+          
         root = Tk()
         root.title("Audio NuPIC DMX")
 
         mainframe = ttk.Frame(root, padding="3 3 12 12")
-        mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
+        mainframe.grid(column=6, row=10, sticky=(N, W, E, S))
         mainframe.columnconfigure(0, weight=1)
         mainframe.rowconfigure(0, weight=1)
 
@@ -162,15 +180,49 @@ class interface:
         audioVar    = IntVar()
         plotVar     = IntVar()
         htmVar      = IntVar()
+        dmxVar.set(1)
+        audioVar.set(1)
+        plotVar.set(0)
+        htmVar.set(1)
 
-        ttk.Button(mainframe, text="Start", command=startProgram).grid(column=3, row=5, sticky=W)
-        ttk.Button(mainframe, text="Pause", command=pauseProgram).grid(column=3, row=6, sticky=W)
-        ttk.Button(mainframe, text="Stop" , command=stopProgram).grid(column=3, row=7, sticky=W)
+        f1          = Entry(mainframe, width = 7) # Frequency 1
+        f2          = Entry(mainframe, width = 7)
+        f3          = Entry(mainframe, width = 7) # Frequency 1
+        f4          = Entry(mainframe, width = 7)
+        gateEntry   = Entry(mainframe, width = 3)
 
-        ttk.Checkbutton(mainframe, text="DMX",   variable=dmxVar).grid(column = 3, row=1, sticky=W)
-        ttk.Checkbutton(mainframe, text="AUDIO", variable=audioVar).grid(column = 3, row=2, sticky=W)
-        ttk.Checkbutton(mainframe, text="PLOT",  variable=plotVar).grid(column = 3, row=3, sticky=W)
-        ttk.Checkbutton(mainframe, text="HTM",   variable=htmVar).grid(column = 3, row=4, sticky=W)
+        f1.grid(row=2, column=1, sticky=W)
+        f2.grid(row=2, column=3, sticky=W)
+        f3.grid(row=2, column=5, sticky=W)
+        f4.grid(row=2, column=7, sticky=W)
+        gateEntry.grid(row=2, column = 9)
+        f1.insert(END, 500)
+        f2.insert(END, 500)
+        f3.insert(END, 500)
+        f4.insert(END, 500)
+        gateEntry.insert(END, 40)
+
+
+        ttk.Label(mainframe, text="CONTROLS").grid(column=1, row=1)
+        ttk.Label(mainframe, text="Freq. 1").grid(column=1, row=3, sticky=W)
+        ttk.Label(mainframe, text="Freq. 2").grid(column=3, row=3, sticky=W)
+        ttk.Label(mainframe, text="Freq. 3").grid(column=5, row=3, sticky=W)
+        ttk.Label(mainframe, text="Freq. 4").grid(column=7, row=3, sticky=W)
+        ttk.Label(mainframe, text="Hz").grid(column=2, row=2, sticky=W)
+        ttk.Label(mainframe, text="Hz").grid(column=4, row=2, sticky=W)
+        ttk.Label(mainframe, text="Hz").grid(column=6, row=2, sticky=W)
+        ttk.Label(mainframe, text="Hz").grid(column=8, row=2, sticky=W)
+        ttk.Label(mainframe, text="Gate in dB").grid(column=10, row=2)
+
+        ttk.Button(mainframe, text="Start", command=startProgram).grid(column=8, row=8, sticky=W)
+        ttk.Button(mainframe, text="Pause", command=pauseProgram).grid(column=9, row=8, sticky=W)
+        ttk.Button(mainframe, text="Stop" , command =stopProgram).grid(column=10, row=8, sticky=W)
+        ttk.Button(mainframe, text="Update Gate" , command =gateControl).grid(column=10, row=3)
+
+        ttk.Checkbutton(mainframe, text="DMX",   variable  =dmxVar).grid(column = 7, row=6, sticky=W)
+        ttk.Checkbutton(mainframe, text="AUDIO", variable=audioVar).grid(column = 8, row=6, sticky=W)
+        ttk.Checkbutton(mainframe, text="PLOT",  variable =plotVar).grid(column = 9, row=6, sticky=W)
+        ttk.Checkbutton(mainframe, text="HTM",   variable =htmVar).grid(column = 10, row=6, sticky=W)
 
 
         for child in mainframe.winfo_children(): child.grid_configure(padx=5, pady=5)           
@@ -185,6 +237,9 @@ class nupicModels(threading.Thread):
     def __init__(self, number):
 
         threading.Thread.__init__(self)
+
+        self.daemon = True
+
         self.number     = number
         self.amplitude  = 1
         self.model      = ModelFactory.create(model_params.MODEL_PARAMS)
@@ -216,6 +271,8 @@ class Visualizations(threading.Thread):
     def __init__(self, xAxis):
 
         threading.Thread.__init__(self)
+
+        self.daemon = True
 
         """
         Initialise constants, variables and buffers
@@ -380,7 +437,7 @@ class AudioStream:
 
     def __init__(self):
 
-
+        self.daemon = True
 
         """
         Sampling details
@@ -422,7 +479,7 @@ class AudioStream:
         def callback(in_data,frame_count, time_info, status):
             self.audio = numpy.fromstring(in_data,dtype=numpy.int16)
             self.audioFFT = self.fft(self.audio)
-            self.audioFFT = 20*numpy.log10(self.audioFFT)            
+            self.audioFFT = 20*numpy.log10(self.audioFFT)         
             self.audioStarted = 1
             return (self.audioFFT, pyaudio.paContinue)
 
@@ -457,6 +514,8 @@ class Main(threading.Thread):
     def __init__(self):
 
         threading.Thread.__init__(self)
+        self.daemon = True
+
 
     def run(self):
 
@@ -551,11 +610,13 @@ class Main(threading.Thread):
                     """
                     if HTM and AUDIO:
                         for i in range(noBins):
-                            if audioFFT[indexes[i]] >= 0 and audioFFT[indexes[i]] < 200:
-                                nupicObject[i].amplitude    = int(audioFFT[indexes[i]])                        
+                            if audioFFT[indexes[i]] >= GATE and audioFFT[indexes[i]] < 200:
+                                nupicObject[i].amplitude    = int(audioFFT[indexes[i]])
+                            elif audioFFT[indexes[i]] < GATE: #GATE!
+                                nupicObject[i].amplitude    = 0                        
                         anomaly     = [nupicObject[i].anomaly    for i in range(noBins)]
                         likelihood  = [nupicObject[i].likelihood for i in range(noBins)] 
-                                     
+                    print "GATE = " + str(GATE)                
                     anomalyAv    = numpy.sum(anomaly)   /noBins
                     likelihoodAv = numpy.sum(likelihood)/noBins #Range expanded and clipped for DMX Lighting reasons!
                     #print "Anomaly : " + str(anomaly)
@@ -641,6 +702,8 @@ class pydmx(threading.Thread):
         
         self.anomalyDMX = 20
         threading.Thread.__init__(self)
+
+        self.daemon = True
         
         self.channels       = [0 for i in range(512)]
         
