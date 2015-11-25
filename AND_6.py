@@ -616,7 +616,7 @@ class Main(threading.Thread):
                                 nupicObject[i].amplitude    = 0                        
                         anomaly     = [nupicObject[i].anomaly    for i in range(noBins)]
                         likelihood  = [nupicObject[i].likelihood for i in range(noBins)] 
-                    print "GATE = " + str(GATE)                
+                                  
                     anomalyAv    = numpy.sum(anomaly)   /noBins
                     likelihoodAv = numpy.sum(likelihood)/noBins #Range expanded and clipped for DMX Lighting reasons!
                     #print "Anomaly : " + str(anomaly)
