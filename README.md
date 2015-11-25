@@ -10,7 +10,7 @@ The Machine Learning algorithm used is a Hierarchical Temporal Memory (HTM) impl
 The inspiration for this comes from a work by artist/cybernitician Gordon Pask called Musicolour, which took audio and gave visual output playing with concepts like learning machines, memory elements, repetitive input, and the reaction of the system to such repetitions, growing less reactive to repetition than to novel input. All this being analogue and here ported to contemporary digital technology and current machine learning systems. 
 
 ## to Install
-Copy only the _install.sh file, run it within the folwer you want to work in by typing
+Copy only the _install.sh file, run it within the folder you want to work in by typing
 
 $ ./_install.sh
 
