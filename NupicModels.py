@@ -1,6 +1,6 @@
 
 import threading
-import model_params     
+import ModelParams     
 import time
 
 from nupic.frameworks.opf.modelfactory             import ModelFactory # to create the nupic model
@@ -25,7 +25,7 @@ class NupicModels(threading.Thread):
 
         # Create model, set the predicted field, run and get anomaly
         self.amplitude  = 1
-        self.model      = ModelFactory.create(model_params.MODEL_PARAMS)
+        self.model      = ModelFactory.create(ModelParams.MODEL_PARAMS)
         self.model.enableInference({'predictedField': 'binAmplitude'})
         self.likelihoods= AnomalyLikelihood()
 
