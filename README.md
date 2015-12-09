@@ -1,6 +1,7 @@
 ![Alt text](https://cloud.githubusercontent.com/assets/11702381/11360485/cb342456-9239-11e5-9c1d-c5068b68eb88.png "Optional title")
 
 # audioNupicDMX
+-- AND_9 breaks the project into several class files
 This work takes Audio from a Microphone, processes it with a Machine Learning algorithm in such way that Anomalies are detected in the sound. This anomalies are used to generate one single, or several values, ranging between 0 and 255 to send over a DMX bus in order to control lights on a custom fashion. The system is programmed in Python, and it uses version 2.7 specifically. 
 
 Anomaly, referring to some values of the sound input that divert from what has been expected, or normal. 
