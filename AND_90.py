@@ -16,7 +16,7 @@ import optparse                             # Used to Parse arguments, verbosity
 import threading                            # The whole project is build with threading. 
 import ttk                                  # GUI
 import glob                                 # The glob module finds all the pathnames matching a specified pattern
-from Tkinter import *                       # FUI
+from Tkinter import *                       # GUI
 
 import ModelParams                          # Parameters to build the NuPIC models
 from Controls       import *                # General application parameters and logic
