@@ -1,4 +1,4 @@
-
+# TODO : Make this or the main file an executable by double clicking it.
 # Install Mac's Command Line Developer Tools 
 touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress;
 PROD=$(softwareupdate -l |
