@@ -376,14 +376,6 @@ class Main(threading.Thread):
             print 'Loading following audio files: '
             print WAV_FILES
         
-
-        """ Create DMX object, start thread outputs messages from a buffer"""  
-        if DMX:
-            print 'Start DMX Stream'      
-            dmx = PyDMX(DMX_NUMBER, NOBINS, DMX_OFFSET, DMX_GAP, RGB, SERIAL_PORT, verbose)
-            dmx.start()
-            
-
         """ Start the NuPIC model """
         if HTM:
             nupicObject = [NupicModels(i,HTMHERTZ, verbose) for i in range(NOBINS)]
@@ -394,6 +386,13 @@ class Main(threading.Thread):
         likelihood   = anomaly
         anomalyAv    = 0.5
         likelihoodAv = 0.5 #Range expanded and clipped for DMX Lighting reasons!
+        
+
+        """ Create DMX object, start thread outputs messages from a buffer"""  
+        if DMX:
+            print 'Start DMX Stream'      
+            dmx = PyDMX(DMX_NUMBER, NOBINS, DMX_OFFSET, DMX_GAP, RGB, SERIAL_PORT, verbose)
+            dmx.start()
 
 
         """ Initialise the plots, BUFFERSIZE is the width of the plot. """
@@ -410,7 +409,6 @@ class Main(threading.Thread):
         MODEL_RUN   = 1
         startTime   = time.time()
         elapsed     = startTime
-        elapsedHTM  = startTime
         
         while MODEL_RUN:  
 
@@ -422,19 +420,31 @@ class Main(threading.Thread):
                         audio       = audioObject.audio
                         audioFFT    = audioObject.audioFFT
                     """---------------------------------------------------------------------------------------"""
+                    
+                    """ WAV FILES - Play a number of wav files sorted corresponding to the anomaly value """
+
+                    if FILES:
+                        if time.time()-elapsed > WAV_MINUTES*60:                        
+                            print 'Audio for Anomaly: ' + str(anomalyAv) 
+                            wavFiles[int(anomalyAv*(len(wavFiles)))].play = 1
+
+                            elapsed = time.time()
+                    """---------------------------------------------------------------------------------------"""
 
                     """ NUPIC MODEL - Run the NuPIC model and get the anomaly score back. Feed on bin only."""
                                             
                     if HTM and AUDIO: 
                         for i in range(NOBINS):
                             if audioFFT[INDEXES[i]] >= GATE and audioFFT[INDEXES[i]] < 200:
+                                nupicObject[i].amplitude    = int(audioFFT[INDEXES[i]])
                                 if verbose:
                                     print 'Amplitude Model ' + str(i) + " set to: " + str(int(audioFFT[INDEXES[i]]))
-                                nupicObject[i].amplitude    = int(audioFFT[INDEXES[i]])
+                                
                             elif audioFFT[INDEXES[i]] < GATE: #GATE!
+                                nupicObject[i].amplitude    = 0 
                                 if verbose:
                                     print 'Amplitude Model ' + str(i) + " set to: " + str(0)
-                                nupicObject[i].amplitude    = 0                        
+                                                       
                         anomaly     = [nupicObject[i].anomaly    for i in range(NOBINS)]
                         likelihood  = [nupicObject[i].likelihood for i in range(NOBINS)]
                         anomalyAv    = numpy.sum(anomaly)   /NOBINS
@@ -444,23 +454,16 @@ class Main(threading.Thread):
 
                     if HTM and AUDIO == 0:
                         for i in range(NOBINS):
-                            nupicObject[i].amplitude    = random.randint(0,200)                                                 
+                            nupicObject[i].amplitude    = random.randint(0,200)
+                            if verbose:
+                                    print 'Amplitude Model ' + str(i) + " randomly set to: " + str(nupicObject[i].amplitude)
+                                    
                         anomaly      = [nupicObject[i].anomaly    for i in range(NOBINS)]
                         likelihood   = [nupicObject[i].likelihood for i in range(NOBINS)]
                         anomalyAv    = numpy.sum(anomaly)   /NOBINS
                         likelihoodAv = numpy.sum(likelihood)/NOBINS #Range expanded and clipped for DMX Lighting reasons!
                         if verbose:
-                            print "Anomaly no Audio : " + str(anomaly)
-                    """---------------------------------------------------------------------------------------"""
-
-                    """ WAV FILES - Play a number of wav files sorted corresponding to the anomaly value """
-
-                    if FILES:
-                        if time.time()-elapsed > WAV_MINUTES*60:                        
-                            print 'Audio for Anomaly: ' + str(anomalyAv) 
-                            wavFiles[int(anomalyAv*(len(wavFiles)))].play = 1
-
-                            elapsed = time.time()
+                            print "Anomaly No Audio : " + str(anomaly)
                     """---------------------------------------------------------------------------------------"""
 
                     """ DMX - Pass Likelihood value to the DMX Thread. Clip values below 0."""
@@ -512,11 +515,11 @@ class Main(threading.Thread):
                     print 'Stop - Exception - Keyboard Interrupt'
                     pass
 
-                # except Exception, err:
-                #     MODEL_RUN  = 0
-                #     print 'Stop - Exception - Error'
-                #     print err
-                #     pass
+                except Exception, err:
+                    MODEL_RUN  = 0
+                    print 'Stop - Exception - Error'
+                    print err
+                    pass
                 
         
         if PLOT:
