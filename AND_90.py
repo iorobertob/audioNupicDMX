@@ -56,14 +56,13 @@ import ttk
 import glob#The glob module finds all the pathnames matching a specified pattern
 from Tkinter import *
 
-import model_params     
+import ModelParams     
 from Controls       import *
 from NupicModels    import NupicModels
 from Visualizations import Visualizations
 from AudioStream    import AudioStream
 from AudioFile      import AudioFile
 from PyDMX          import PyDMX
-
 
 def destroy(e): sys.exit() # exit from the GUI
 os.nice(100)
@@ -153,9 +152,9 @@ class interface:
             HTM         =               htmVar.get()
             NOBINS      =    int(entryMODELNUM.get())
             HTMHERTZ    =    int(entryHTMHERTZ.get())
-            model_params.MODEL_PARAMS['modelParams']['spParams']['columnCount']    = int(entryCOLUMNS.get())
-            model_params.MODEL_PARAMS['modelParams']['tpParams']['columnCount']    = int(entryCOLUMNS.get())
-            model_params.MODEL_PARAMS['modelParams']['tpParams']['cellsPerColumn'] = int(  entryCELLS.get())            
+            ModelParams.MODEL_PARAMS['modelParams']['spParams']['columnCount']    = int(entryCOLUMNS.get())
+            ModelParams.MODEL_PARAMS['modelParams']['tpParams']['columnCount']    = int(entryCOLUMNS.get())
+            ModelParams.MODEL_PARAMS['modelParams']['tpParams']['cellsPerColumn'] = int(  entryCELLS.get())            
 
             DMX         =               dmxVar.get()
             SERIAL_PORT =            serialVar.get()
