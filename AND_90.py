@@ -1,47 +1,33 @@
 #!/usr/bin/env python
 #-----------------------------------------------------------------------
 # Name:         nupicAudioDMX
-# Purpose:      Custom comisioned code
+# Purpose:      Custom comisioned code - See README.md for details.
 # Author:       IO - Code
 # Created:      23/11/2015
 # Copyright:    (c) IO - Code 2015
 # License:      see License.txt
 #-----------------------------------------------------------------------
 
-"""
-See README.md for details.
-"""
-"""
-numpy - the language of pyaudio (& everything else)
-pyaudio - access to the mic via the soundcard
-os - to increment niceness
-time - supports delays
-sys - serial usb hardware
-serial - to use usb interface
-threading - 3 threads: main, audio and serial.
-pyplot - to plot the sound frequencies
-"""
-import numpy 
-import random
-import os
-import time
-import sys
-import optparse
-import threading
-import ttk
-import glob         #The glob module finds all the pathnames matching a specified pattern
-from Tkinter import *
+import numpy                                # The language of pyaudio (& everything else)
+import random                               # Use random numbers in some situations 
+import time                                 # To keep track of processes´ times
+import sys                                  # Systems functions, such as exit. 
+import optparse                             # Used to Parse arguments, verbosity only implemented 
+import threading                            # The whole project is build with threading. 
+import ttk                                  # GUI
+import glob                                 # The glob module finds all the pathnames matching a specified pattern
+from Tkinter import *                       # FUI
 
-import ModelParams     
-from Controls       import *
-from NupicModels    import NupicModels
-from Visualizations import Visualizations
-from AudioStream    import AudioStream
-from AudioFile      import AudioFile
-from PyDMX          import PyDMX
+import ModelParams                          # Parameters to build the NuPIC models
+from Controls       import *                # General application parameters and logic
+from NupicModels    import NupicModels      # NuPIC models thread
+from Visualizations import Visualizations   # Plots thread
+from AudioStream    import AudioStream      # Audio input thread
+from AudioFile      import AudioFile        # Audio Files thread
+from PyDMX          import PyDMX            # Serial, DMX thread
 
 def destroy(e): sys.exit() # exit from the GUI
-os.nice(100)
+
 ########################################################################################################
 """ Parse for Verbose """
 verbose = False
