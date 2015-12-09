@@ -57,8 +57,8 @@ import glob#The glob module finds all the pathnames matching a specified pattern
 from Tkinter import *
 
 import model_params     
-from controls       import *
-from nupicModels    import nupicModels
+from Controls       import *
+from NupicModels    import NupicModels
 from Visualizations import Visualizations
 from AudioStream    import AudioStream
 from AudioFile      import AudioFile
@@ -425,7 +425,7 @@ class Main(threading.Thread):
 
         """ Start the NuPIC model """
         if HTM:
-            nupicObject = [nupicModels(i,HTMHERTZ, verbose) for i in range(NOBINS)]
+            nupicObject = [NupicModels(i,HTMHERTZ, verbose) for i in range(NOBINS)]
             [nupicObject[i].start() for i in range(NOBINS)]                        
             print 'Start NuPIC models'
             print "Number of NuPIC models:\t"+ str(NOBINS) 
