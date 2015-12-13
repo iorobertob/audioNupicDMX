@@ -53,9 +53,9 @@ class interface:
             print "Noise Gate set to " + str(entryGATE.get()) + " dB"
 
         def setBright(*args):
-            global BRIGHTENESS
-            BRIGHTENESS = float(entryDMXBRIGHT.get())
-            print "Brightness: " + str(BRIGHTENESS)
+            global BRIGHTNESS
+            BRIGHTNESS = float(entryDMXBRIGHT.get())
+            print "Brightness: " + str(BRIGHTNESS)
 
         def on_closing():
             global MODEL_RUN
@@ -284,6 +284,7 @@ class interface:
         ttk.Label(root, text="Audio Files").place(x=leftMargin,                y=(7*rowHeight)+(6*space), width=width,       height=rowHeight)
         ttk.Label(root, text="Number"  ).place(x=leftMargin,                   y=(8*rowHeight)+(7*space), width=2*width/3,   height=rowHeight)
         ttk.Label(root, text="Interval").place(x=leftMargin,                   y=(9*rowHeight)+(8*space), width=2*width/3,   height=rowHeight)
+        ttk.Label(root, text="mins."    ).place(x=leftMargin+width,            y=(9*rowHeight)+(8*space), width=width/3,     height=rowHeight)
         ttk.Label(root, text="HTM"     ).place(x=leftMargin+(2*width)+width/2, y=(2*rowHeight)+(1*space), width=width,       height=rowHeight)
         ttk.Label(root, text="Models"  ).place(x=leftMargin+(2*width)+width/2, y=(3*rowHeight)+(2*space), width=width/2,     height=rowHeight)
         ttk.Label(root, text="Cols."   ).place(x=leftMargin+(2*width)+width/2, y=(4*rowHeight)+(3*space), width=width/2,     height=rowHeight)
@@ -341,11 +342,13 @@ class Main(threading.Thread):
         self.daemon = True
         
     def run(self):
+
         global AUDIO
         global FILES
         global HTM
         global HTMREADY
         global DMX
+        global BRIGHTNESS
         global CYCLE
         global PLOT
         global START        
@@ -426,7 +429,7 @@ class Main(threading.Thread):
                     if FILES:
                         if time.time()-elapsed > WAV_MINUTES*60:                        
                             print 'Audio for Anomaly: ' + str(anomalyAv) 
-                            wavFiles[int(anomalyAv*(len(wavFiles)))].play = 1
+                            wavFiles[int(anomalyAv*(len(wavFiles)-1))].play = 1
 
                             elapsed = time.time()
                     """---------------------------------------------------------------------------------------"""
@@ -445,8 +448,8 @@ class Main(threading.Thread):
                                 if verbose:
                                     print 'Amplitude Model ' + str(i) + " set to: " + str(0)
                                                        
-                        anomaly     = [nupicObject[i].anomaly    for i in range(NOBINS)]
-                        likelihood  = [nupicObject[i].likelihood for i in range(NOBINS)]
+                        anomaly      = [nupicObject[i].anomaly    for i in range(NOBINS)]
+                        likelihood   = [nupicObject[i].likelihood for i in range(NOBINS)]
                         anomalyAv    = numpy.sum(anomaly)   /NOBINS
                         likelihoodAv = numpy.sum(likelihood)/NOBINS #Range expanded and clipped for DMX Lighting reasons!
                         if verbose:
@@ -468,6 +471,7 @@ class Main(threading.Thread):
 
                     """ DMX - Pass Likelihood value to the DMX Thread. Clip values below 0."""
                     if DMX and HTM:
+                        dmx.BRIGHTNESS = BRIGHTNESS
                         if anomalyAv < 0:
                             dmx.VALUES = [0]*NOBINS                   
                         if anomalyAv > 0.17:
@@ -475,9 +479,9 @@ class Main(threading.Thread):
                             dmx.VALUES = anomaly                            
                             #dmx.VALUES = int(likelihoodAv*300 -50)#CHANGE OR ADD self.anomalyLikelihood
                         # Cycle the colour values of the DMX channels, keeping their RGB proportion, and cycling through 255 steps
-                        CYCLE += 1
-                        if(CYCLE > 255):
-                            CYCLE = 0
+                        dmx.CYCLE += 1
+                        if(dmx.CYCLE > 255):
+                            dmx.CYCLE = 0
 
                     if DMX and HTM == 0:
                         if 1 < audioFFT[10] and  audioFFT[10] < 255:
