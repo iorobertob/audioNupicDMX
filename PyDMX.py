@@ -125,7 +125,6 @@ class PyDMX(threading.Thread):
 
                     channel = i*self.DMX_GAP+j+self.DMX_OFFSET
                     colour = int((self.RGB[3*i+j] + self.CYCLE)*self.BRIGHTNESS*self.VALUES[int(i - (self.length*math.floor(i/self.length)) ) ])  
-                    
                     if colour > 255:
                         colour = int(colour - 255*math.floor(colour/255) )
                     self.set_channel(channel,colour)
