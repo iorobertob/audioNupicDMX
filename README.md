@@ -22,7 +22,7 @@ this should install all dependencies, clone this respository and set go into tha
 
 After that the main file AND_6.py can be called with:
 
-$ python AND_6.py
+$ python AND_90.py
 
 ## hardware Requirements
 
