@@ -10,7 +10,7 @@
 
 import numpy                                # The language of pyaudio (& everything else)
 import random                               # Use random numbers in some situations 
-import time                                 # To keep track of processes´ times
+import time                                 # To keep track of processes' times
 import sys                                  # Systems functions, such as exit. 
 import optparse                             # Used to Parse arguments, verbosity only implemented 
 import threading                            # The whole project is build with threading. 
