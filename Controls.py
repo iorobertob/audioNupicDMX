@@ -10,7 +10,7 @@ ANOMALY_THRESHOLD   = 0.9   # To report when an anomaly exceeds a value. Not imp
 AUDIO               = 1     # Audio module ON/OFF
 SR                  = 8000  # Sample Rate of the audio input. 
 BITRES              = 16    # Bit Resolution 
-BUFFERSIZE          = 2**6  #64
+BUFFERSIZE          = 2**6  #127
 FREQPERBIN          =  int(SR/BUFFERSIZE)   # Frequencies in each bin of the FFT
 NOBINS              = 4     # How many frequencies to use for the models
 INDEXES             = [
@@ -39,6 +39,7 @@ RGB                 = [0] * DMX_GAP * 3    # Array to hold RGB values
 BRIGHTENESS         = 1.0   # Range[0.0,1.0]
 #-------------------------------------------------------------------------------------------------------
 PLOT                = 0     # Plot  module ON/OFF
+PLOT_WIDTH 			= 100 	# 
 #-------------------------------------------------------------------------------------------------------
 START               = 0     # Start the execution of the secondary Thread after the Tkinter
 MODEL_RUN           = 1     # Start the processing loop

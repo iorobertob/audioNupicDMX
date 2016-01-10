@@ -10,13 +10,11 @@ class AudioStream:
         self.daemon = True
 
         """
-        Sampling details
-        rate: The sampling rate in Hz of my soundcard
-        sizeBuffer: The size of the array to which we will save audio segments (2^12 = 4096 is very good)
+        Sampling rate of this sound device, size and resolution of buffers and initial values
         """
         self.audioStarted   = 0
         self.verbose        = verbose
-        self.rate           = sr
+        self.rate           = sr  
         self.bufferSize     = bufferSize
         self.bitRes         = bitRes 
         self.binSize        =int(self.rate/self.bufferSize)
@@ -36,6 +34,7 @@ class AudioStream:
 
         """
         Setting up the array that will handle the timeseries of audio data from our input
+        TODO: Change string to use parameter to set this
         """
         if (self.bitRes == 16):
             self.audio = numpy.empty((self.bufferSize),dtype="int16")
@@ -57,8 +56,7 @@ class AudioStream:
             return (self.audioFFT, pyaudio.paContinue)
 
         """
-        Open the Audio Stream.
-        Start separate thread
+        Open the Audio Stream. Start separate thread
         """    
         self.inStream = p.open(format   = p.get_format_from_width(width, unsigned=False),
                                channels =1,
@@ -70,11 +68,7 @@ class AudioStream:
                                                                                                                                            
     def fft(self, audio):
             """
-            Fast fourier transform conditioning
-            Output:     'output' contains the strength of each frequency in the audio signal
-            frequencies are marked by its position in 'output'
-            Method:      Use numpy's FFT (numpy.fft.fft)
-            Great info here: http://stackoverflow.com/questions/4364823/how-to-get-frequency-from-fft-result
+            Fast Fourier Transform 'output' contains the strength of each frequency in the audio signal
             """
             left = numpy.abs(numpy.fft.fft(audio))
             output = left
