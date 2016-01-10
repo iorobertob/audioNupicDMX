@@ -2,25 +2,25 @@
 # License: http://creativecommons.org/licenses/by-sa/3.0/	
 
 import threading 
-
+import time
 import random
 import matplotlib
 matplotlib.use("TkAgg")
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
-
-from collections import deque
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+from matplotlib.figure                 import Figure
+from collections                       import deque
 
 
 class Plot(threading.Thread):
 
-        def __init__(self,root, Xaxis, size, A, B, C, D):
+        def __init__(self,root, Xaxis, size, A, B, C, D, verbose):
 
             threading.Thread.__init__(self)
             self.daemon = True
             self.Xaxis  = Xaxis
             self.size   = size
+            self.verbose= verbose
 
             font = {
             'weight':100,
@@ -32,7 +32,7 @@ class Plot(threading.Thread):
 
             """ Setting up the Figure """
 
-            root.geometry("1200x400")
+            root.geometry("1225x425")
             self.f = Figure(figsize=(5,5), dpi=100)
 
 
@@ -70,26 +70,26 @@ class Plot(threading.Thread):
             self.cPlot = []
             self.dPlot = []
             for i in range(self.size):
-                tempPlot, = self.b.plot(range(Xaxis), range(Xaxis))
+                tempPlot, = self.b.plot(range(Xaxis), [0]*(Xaxis))
                 self.bPlot.append(tempPlot)
 
-            for i in range(self.size + 1):
-                tempPlot, = self.c.plot(range(Xaxis), range(Xaxis))
+            for i in range(self.size):
+                tempPlot, = self.c.plot(range(Xaxis), [0]*(Xaxis))
                 self.cPlot.append(tempPlot)
                                
-                tempPlot, = self.d.plot(range(Xaxis), range(Xaxis))
+                tempPlot, = self.d.plot(range(Xaxis), [0]*(Xaxis))
                 self.dPlot.append(tempPlot)
             """-----------------------------------------------------------------------------------------------------------------------------"""
 
             """ Final settings and display """
             self.a.set_ylim(-1000,1000)
-            self.b.set_ylim(50,  130)            
+            self.b.set_ylim(50,  100)            
             self.c.set_ylim(0.0  ,1.0)
             self.d.set_ylim(0.0  ,1.0)
             
             self.canvas = FigureCanvasTkAgg(self.f, root)
             self.canvas.show()
-            self.canvas.get_tk_widget().place(x=700,y=25, width=500, height=350)
+            self.canvas.get_tk_widget().place(x=750,y=50, width=450, height=350)
             
             self.PLOT   = 1
             self.PLOT_A = A
@@ -97,11 +97,11 @@ class Plot(threading.Thread):
             self.PLOT_C = C
             self.PLOT_D = D
 
-            self.start()
             """-----------------------------------------------------------------------------------------------------------------------------"""
 
 
         def run(self):
+            startTime   = time.time()
             while self.PLOT:
 
                 if self.PLOT_A:
@@ -127,13 +127,13 @@ class Plot(threading.Thread):
                         self.plotDLines[i].rotate(-1)
                         self.plotDLines[i][self.Xaxis-1] = self.newDValues[i] 
                         self.dPlot[i].set_ydata(self.plotDLines[i])
+
+
                 """-----------------------------------------------------------------------------------------------------------------------------"""
              
-                #self.canvas.draw()
-                # self.canvas.blit(self.a.bbox)
-                # self.canvas.blit(self.b.bbox)
-                # self.canvas.blit(self.c.bbox)
-                # self.canvas.blit(self.d.bbox)
                 self.canvas.show()
+                if self.verbose:
+                        print 'Time taken in Plot Loop: ' + format(time.time() - startTime)
+                        startTime = time.time()
             
             print "Exit Plot"

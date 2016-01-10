@@ -39,6 +39,7 @@ RGB                 = [0] * DMX_GAP * 3    # Array to hold RGB values
 BRIGHTENESS         = 1.0   # Range[0.0,1.0]
 #-------------------------------------------------------------------------------------------------------
 PLOT                = 0     # Plot  module ON/OFF
+PLOT_WIDTH 			= 100 	# 
 #-------------------------------------------------------------------------------------------------------
 START               = 0     # Start the execution of the secondary Thread after the Tkinter
 MODEL_RUN           = 1     # Start the processing loop

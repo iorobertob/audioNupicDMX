@@ -8,8 +8,6 @@
 # License:      see License.txt
 #-----------------------------------------------------------------------
 
-
-
 import numpy                                # The language of pyaudio (& everything else)
 import random                               # Use random numbers in some situations 
 import time                                 # To keep track of processes' times
@@ -19,12 +17,12 @@ import threading                            # The whole project is build with th
 import ttk                                  # GUI
 import glob                                 # The glob module finds all the pathnames matching a specified pattern
 from Tkinter import *                       # GUI
+import tkMessageBox                         # Message box for error messages for entry types. 
 
 import ModelParams                          # Parameters to build the NuPIC models
 from Controls       import *                # General application parameters and logic
 from NupicModels    import NupicModels      # NuPIC models thread
-#from Visualizations import Visualizations   # Plots thread
-from AudioStream    import AudioStream      # Audio input thread
+from AudioStreamFFT import AudioStream      # Audio input thread
 from AudioFile      import AudioFile        # Audio Files thread
 from PyDMX          import PyDMX            # Serial, DMX thread
 
@@ -47,16 +45,90 @@ parser.add_option(
 
 class interface:
 
+    def EntriesUpdate(self,*args):
+        global SR
+        try:
+            SR      = int(self.entrySR.get())
+        except :
+            tkMessageBox.showinfo("Error", "Sample Rate must be a number.")
+            error   = True  
 
-    def gateControl(self, *args):
-        global GATE 
-        GATE = int(self.entryGATE.get())
-        print "Noise Gate set to " + str(self.entryGATE.get()) + " dB"
+    def AudioUpdate(self, *args):
+        global AUDIO
+        AUDIO  = self.audioVar.get()
 
-    def setBright(self, *args):
+    def HTMUpdate(self, *args):
+        global HTM
+        HTM    = self.htmVar.get()
+
+    def DMXUpdate(self, *args):
+        global DMX
+        DMX    = self.dmxVar.get()
+
+    def FilesUpdate(self, *args):
+        global FILES
+        FILES  = self.filesVar.get()
+
+    def PlotUpdate(self, *args):
+        global PLOT
+        PLOT   = self.plotVar.get()
+
+    def plot1Update(self, *args):
+        global PLOT_1
+        PLOT_1 = self.plot1Var.get()
+
+    def plot2Update(self, *args):
+        global PLOT_2
+        PLOT_2 = self.plot2Var.get()
+
+    def plot3Update(self, *args):
+        global PLOT_3
+        PLOT_3 = self.plot3Var.get()
+
+    def plot4Update(self, *args):
+        global PLOT_4
+        PLOT_4 = self.plot4Var.get()
+        
+
+    def ControlUpdate(self, *args):
+        global GATE
         global BRIGHTNESS
-        BRIGHTNESS = float(self.entryDMXBRIGHT.get())
-        print "Brightness: " + str(BRIGHTNESS)
+        global WAV_MINUTES
+        global HTMHERTZ
+        global INDEXES
+
+        try: 
+            GATE = int(self.entryGATE.get())          
+        except ValueError:
+            tkMessageBox.showinfo("Error","Gate Value must be a number")   
+        
+        try:
+            BRIGHTNESS = float(self.entryDMXBRIGHT.get())
+        except ValueError:
+            tkMessageBox.showinfo("Error","Brightness Value must be a number")   
+
+        try: 
+            WAV_MINUTES = float(self.entryWAVMINS.get())
+        except ValueError:
+            tkMessageBox.showinfo("Error","Minutes of Interval in between WAV Files must be a number")
+            
+        try:
+            HTMHERTZ    = int(self.entryHTMHERTZ.get())
+        except ValueError:
+            tkMessageBox.showinfo("Error","Frequency of Models computation must be a number")
+            
+        try:
+            for i in range(len(self.entryFREQS)):
+                INDEXES[i] = int(int(self.entryFREQS[i].get())/FREQPERBIN ) 
+        except ValueError:
+            tkMessageBox.showinfo("Error","Frequency values must be a number")
+
+        try:
+            for i in range(len(self.entryRGB)):
+                RGB[i] = int(self.entryRGB[i].get())  
+        except ValueError:
+            tkMessageBox.showinfo("Error","Colour values must be a number")
+                    
 
     def on_closing(self, *args):
         global MODEL_RUN
@@ -110,47 +182,119 @@ class interface:
         global RGB
         global BRIGHTNESS
 
-        AUDIO       =             self.audioVar.get()
-        SR          =          int(self.entrySR.get())
-        FILES       =             self.filesVar.get()
-        noFiles     =    int(self.entryFILESNUM.get())
-        WAV_FILES   = [(str(i+1)+'.wav') for i in range(noFiles)] 
-        WAV_MINUTES =   float(self.entryWAVMINS.get())           
+        error = False 
 
-        HTM         =               self.htmVar.get()
-        NOBINS      =    int(self.entryMODELNUM.get())
-        HTMHERTZ    =    int(self.entryHTMHERTZ.get())
-        ModelParams.MODEL_PARAMS['modelParams']['spParams']['columnCount']    = int(self.entryCOLUMNS.get())
-        ModelParams.MODEL_PARAMS['modelParams']['tpParams']['columnCount']    = int(self.entryCOLUMNS.get())
-        ModelParams.MODEL_PARAMS['modelParams']['tpParams']['cellsPerColumn'] = int(  self.entryCELLS.get())            
+        AUDIO       = self.audioVar.get()
+        FILES       = self.filesVar.get()
+        HTM         = self.htmVar.get()
+        DMX         = self.dmxVar.get()
+        SERIAL_PORT = self.serialVar.get()
 
-        DMX         =               self.dmxVar.get()
-        SERIAL_PORT =            self.serialVar.get()
-        DMX_NUMBER  =      int(self.entryDMXNUM.get())
-        DMX_GAP     =      int(self.entryDMXGAP.get())
-        DMX_OFFSET  =    int(self.entryDMXOFFST.get())
-        BRIGHTNESS  = float(self.entryDMXBRIGHT.get()) 
-
-        PLOT        =              self.plotVar.get()
+        PLOT        = self.plotVar.get()
         PLOT_1      = self.plot1Var.get()
         PLOT_2      = self.plot2Var.get()
         PLOT_3      = self.plot3Var.get()
         PLOT_4      = self.plot4Var.get()
-        
-        for i in range(len(self.entryFREQS)):
-            INDEXES[i] = int(int(self.entryFREQS[i].get())/FREQPERBIN )               
 
-        for i in range(len(self.entryRGB)):
-            RGB[i] = int(self.entryRGB[i].get())                
+        try:
+            SR          = int(self.entrySR.get())
+            self.entrySR.config(state=DISABLED)
+        except :
+            tkMessageBox.showinfo("Error", "Sample Rate must be a number.")
+            error   = True        
 
-        START   = 1
-        PAUSE   = 1
-        print 'Start'
-        print 'Frequencies to Analyse:'
-        print self.entryFREQS[0].get() + " Hz, " + self.entryFREQS[1].get() + " Hz, " + self.entryFREQS[2].get() + " Hz, and " + self.entryFREQS[3].get() + " Hz."
+        try:
+            noFiles     = int(self.entryFILESNUM.get())
+            self.entryFILESNUM.config(state=DISABLED)
+        except ValueError:
+            tkMessageBox.showinfo("Error","Number of Files must be a number")
+            error = True
 
+        WAV_FILES       = [(str(i+1)+'.wav') for i in range(noFiles)]
 
+        try: 
+            WAV_MINUTES = float(self.entryWAVMINS.get())
+        except ValueError:
+            tkMessageBox.showinfo("Error","Minutes Interval in between WAV Files must be a number")
+            error = True        
 
+        try:
+            NOBINS      = int(self.entryMODELNUM.get())
+            self.entryMODELNUM.config(state=DISABLED)
+        except ValueError:
+            tkMessageBox.showinfo("Error","Number of Models must be a number")
+            error = True
+
+        try:
+            HTMHERTZ    = int(self.entryHTMHERTZ.get())
+        except ValueError:
+            tkMessageBox.showinfo("Error","Frequency of Models computation must be a number")
+            error = True
+
+        try:
+            ModelParams.MODEL_PARAMS['modelParams']['spParams']['columnCount']    = int(self.entryCOLUMNS.get())
+            ModelParams.MODEL_PARAMS['modelParams']['tpParams']['columnCount']    = int(self.entryCOLUMNS.get())
+            self.entryCOLUMNS.config(state=DISABLED)
+        except ValueError:
+            tkMessageBox.showinfo("Error","Quantity of Columns must be a number")
+            error = True
+
+        try:
+            ModelParams.MODEL_PARAMS['modelParams']['tpParams']['cellsPerColumn'] = int(  self.entryCELLS.get()) 
+            self.entryCELLS.config(state=DISABLED)
+        except ValueError:
+            tkMessageBox.showinfo("Error","Quantity of Cells must be a number")
+            error = True          
+
+        try:
+            DMX_NUMBER  = int(self.entryDMXNUM.get()) 
+            self.entryDMXNUM.config(state=DISABLED)
+        except ValueError:
+            tkMessageBox.showinfo("Error","Number of DMX Fixtures must be a number")
+            error = True 
+
+        try:
+            DMX_GAP     = int(self.entryDMXGAP.get())
+            self.entryDMXGAP.config(state=DISABLED)
+        except ValueError:
+            tkMessageBox.showinfo("Error","Channel Gap in between DMX Fixtures must be a number")
+            error = True 
+
+        try:
+            DMX_OFFSET  = int(self.entryDMXOFFST.get())
+            self.entryDMXOFFST.config(state=DISABLED)
+        except ValueError:
+            tkMessageBox.showinfo("Error","DMX Offset must be a number")
+            error = True 
+
+        try:
+            BRIGHTNESS  = float(self.entryDMXBRIGHT.get()) 
+        except ValueError:
+            tkMessageBox.showinfo("Error","DMX Brightness must be a number")
+            error = True 
+
+        try:
+            for i in range(len(self.entryFREQS)):
+                INDEXES[i] = int(int(self.entryFREQS[i].get())/FREQPERBIN ) 
+        except ValueError:
+            tkMessageBox.showinfo("Error","Frequency values must be a number")
+            error = True 
+                     
+        try:
+            for i in range(len(self.entryRGB)):
+                RGB[i] = int(self.entryRGB[i].get()) 
+        except ValueError:
+            tkMessageBox.showinfo("Error","Colour values must be a number")
+            error = True 
+                  
+
+        if not error:
+            START   = 1
+            PAUSE   = 1
+            print 'Start'
+            print 'Frequencies to Analyse:'
+            print self.entryFREQS[0].get() + " Hz, " + self.entryFREQS[1].get() + " Hz, " + self.entryFREQS[2].get() + " Hz, and " + self.entryFREQS[3].get() + " Hz."
+            
 
     def __init__(self):
             
@@ -173,10 +317,9 @@ class interface:
         """-----------------------------------------------------------------------------------------------------------------------------"""
 
         """ Create Main Object """
-        nupicAudioDMX = Main() #4 bins 
-        nupicAudioDMX.start()
+        self.nupicAudioDMX = Main() #4 bins 
+        self.nupicAudioDMX.start()
         """-----------------------------------------------------------------------------------------------------------------------------"""
-
 
         """ Variables for Checkboxes  """
         self.dmxVar      = IntVar()
@@ -188,20 +331,18 @@ class interface:
         self.plot2Var    = IntVar()
         self.plot3Var    = IntVar()
         self.plot4Var    = IntVar()
-        self.dmxVar.set  (0)
+        self.dmxVar.set  (1)
         self.audioVar.set(1)
         self.filesVar.set(0)
         self.plotVar.set (1)
         self.htmVar.set  (1)
-        self.plot1Var.set(0)
-        self.plot2Var.set(0)
-        self.plot3Var.set(0)
-        self.plot4Var.set(0)
+        self.plot1Var.set(1)
+        self.plot2Var.set(1)
+        self.plot3Var.set(1)
+        self.plot4Var.set(1)
         """-----------------------------------------------------------------------------------------------------------------------------"""
 
-
         """ Entry Objects and their Position"""
-
         self.entryFREQS = [Entry(root) for i in range(FREQS)] 
         self.entryRGB   = [Entry(root) for i in range(3*DMX_NUMBER)]     
 
@@ -224,7 +365,7 @@ class interface:
         self.entryFREQS[2].place( x=leftMargin+1.5*width,                     y=(4*rowHeight)+(3*space), width=width/2,   height=rowHeight)
         self.entryFREQS[3].place( x=leftMargin+1.5*width,                     y=(5*rowHeight)+(4*space), width=width/2,   height=rowHeight)
 
-        self.entryGATE.place(     x=leftMargin,                               y=(5*rowHeight)+(4*space), width=width/4,   height=rowHeight) 
+        self.entryGATE.place(     x=leftMargin+0.5*width,                     y=(5*rowHeight)+(4*space), width=width/4,   height=rowHeight) 
         self.entrySR.place(       x=leftMargin+width/2,                       y=(3*rowHeight)+(2*space), width=width/2,   height=rowHeight)
         self.entryFILESNUM.place( x=leftMargin+width*2/3,                     y=(8*rowHeight)+(7*space), width=width/3,   height=rowHeight)
         self.entryWAVMINS.place(  x=leftMargin+width*2/3,                     y=(9*rowHeight)+(8*space), width=width/3,   height=rowHeight)  
@@ -234,8 +375,8 @@ class interface:
         self.entryHTMHERTZ.place( x=leftMargin+(2*width)+width,               y=(6*rowHeight)+(5*space), width=width/2,   height=rowHeight)  
         self.entryDMXNUM.place(   x=leftMargin+(4.5*width),                   y=(3*rowHeight)+(2*space), width=width/4,   height=rowHeight)
         self.entryDMXGAP.place(   x=leftMargin+(4.66*width),                  y=(7*rowHeight)+(6*space), width=width/3,   height=rowHeight) 
-        self.entryDMXOFFST.place( x=leftMargin+(5*width),                     y=(8*rowHeight)+(7*space), width=width/2,   height=rowHeight)
-        self.entryDMXBRIGHT.place(x=leftMargin+(5*width),                     y=(9*rowHeight)+(8*space), width=width/2,   height=rowHeight)   
+        self.entryDMXOFFST.place( x=leftMargin+(5*width),                     y=(8*rowHeight)+(7*space), width=width/3,   height=rowHeight)
+        self.entryDMXBRIGHT.place(x=leftMargin+(5*width),                     y=(9*rowHeight)+(8*space), width=width/3,   height=rowHeight)   
         self.entryRGB[0].place(   x=leftMargin+(4*width)+0*(width/3-3)      , y=(4*rowHeight)+(3*space), width=width/3-3, height=rowHeight)
         self.entryRGB[1].place(   x=leftMargin+(4*width)+1*(width/3-3)      , y=(4*rowHeight)+(3*space), width=width/3-3, height=rowHeight)
         self.entryRGB[2].place(   x=leftMargin+(4*width)+2*(width/3-3)      , y=(4*rowHeight)+(3*space), width=width/3-3, height=rowHeight)
@@ -255,10 +396,10 @@ class interface:
         self.entryRGB[16].place(  x=leftMargin+(4*width)+4*(width/3-3)+space, y=(5*rowHeight)+(4*space), width=width/3-3, height=rowHeight) 
         self.entryRGB[17].place(  x=leftMargin+(4*width)+5*(width/3-3)+space, y=(5*rowHeight)+(4*space), width=width/3-3, height=rowHeight) 
 
-        self.entryFREQS[0].insert(END, INDEXES[0])        
-        self.entryFREQS[1].insert(END, INDEXES[1])   
-        self.entryFREQS[2].insert(END, INDEXES[2])            
-        self.entryFREQS[3].insert(END, INDEXES[3])
+        self.entryFREQS[0].insert(END, INDEXES[0]*FREQPERBIN)        
+        self.entryFREQS[1].insert(END, INDEXES[1]*FREQPERBIN)   
+        self.entryFREQS[2].insert(END, INDEXES[2]*FREQPERBIN)            
+        self.entryFREQS[3].insert(END, INDEXES[3]*FREQPERBIN)
 
         self.entryGATE.insert(    END, 40)   
         self.entrySR.insert(      END, SR)
@@ -298,9 +439,7 @@ class interface:
         self.entryRGB[17].insert(END, 255) 
         """-----------------------------------------------------------------------------------------------------------------------------"""
 
-
         """ Label Objects and their position """
-
         ttk.Label(root, text="CONTROL",).place(x=leftMargin,                   y=rowHeight,       width=winX-(leftMargin*2), height=rowHeight)
         ttk.Label(root, text="Freq. 1" ).place(x=leftMargin+width,             y=(2*rowHeight)+(1*space), width=width/2,     height=rowHeight)
         ttk.Label(root, text="Freq. 2" ).place(x=leftMargin+width,             y=(3*rowHeight)+(2*space), width=width/2,     height=rowHeight)
@@ -310,7 +449,8 @@ class interface:
         ttk.Label(root, text="Hz"      ).place(x=leftMargin+2*width,           y=(3*rowHeight)+(2*space), width=width/4,     height=rowHeight)
         ttk.Label(root, text="Hz"      ).place(x=leftMargin+2*width,           y=(4*rowHeight)+(3*space), width=width/4,     height=rowHeight)
         ttk.Label(root, text="Hz"      ).place(x=leftMargin+2*width,           y=(5*rowHeight)+(4*space), width=width/4,     height=rowHeight)
-        ttk.Label(root, text="dB"      ).place(x=leftMargin+(width/4),         y=(5*rowHeight)+(4*space), width=width/4,     height=rowHeight)
+        ttk.Label(root, text="Gate"    ).place(x=leftMargin,                   y=(5*rowHeight)+(4*space), width=width/2,     height=rowHeight)
+        ttk.Label(root, text="dB"      ).place(x=leftMargin+0.75*width,        y=(5*rowHeight)+(4*space), width=width/4,     height=rowHeight)
         ttk.Label(root, text="Audio"   ).place(x=leftMargin+(0*2*width),       y=(2*rowHeight)+(1*space), width=width-space, height=rowHeight)
         ttk.Label(root, text="S R"     ).place(x=leftMargin,                   y=(3*rowHeight)+(2*space), width=width/2,     height=rowHeight)
         ttk.Label(root, text="Audio Files").place(x=leftMargin,                y=(7*rowHeight)+(6*space), width=width,       height=rowHeight)
@@ -322,7 +462,11 @@ class interface:
         ttk.Label(root, text="Cols."   ).place(x=leftMargin+(2*width)+width/2, y=(4*rowHeight)+(3*space), width=width/2,     height=rowHeight)
         ttk.Label(root, text="Cells"   ).place(x=leftMargin+(2*width)+width/2, y=(5*rowHeight)+(4*space), width=width/2,     height=rowHeight)
         ttk.Label(root, text="Hertz"   ).place(x=leftMargin+(2*width)+width/2, y=(6*rowHeight)+(5*space), width=width/2,     height=rowHeight)
-        ttk.Label(root, text="Plot"    ).place(x=leftMargin+(2*width)+width/2, y=(7*rowHeight)+(6*space), width=width,       height=rowHeight)
+        ttk.Label(root, text="Plot"    ).place(x=2*leftMargin+(6*width),       y=rowHeight ,              width=500,         height=rowHeight)
+        ttk.Label(root, text="Audio"   ).place(x=2*leftMargin+(6*width),       y=(4*rowHeight)+(3*space), width=50,          height=rowHeight)
+        ttk.Label(root, text="FFT"     ).place(x=2*leftMargin+(6*width),       y=(6*rowHeight)+(5*space), width=50,          height=rowHeight)
+        ttk.Label(root, text="Anly"    ).place(x=2*leftMargin+(6*width),       y=(8*rowHeight)+(7*space), width=50,          height=rowHeight)
+        ttk.Label(root, text="Lklhd"   ).place(x=2*leftMargin+(6*width),       y=(10*rowHeight)+(9*space),width=50,          height=rowHeight)
         ttk.Label(root, text="DMX"     ).place(x=leftMargin+(4*width),         y=(2*rowHeight)+(1*space), width=width-space, height=rowHeight)
         ttk.Label(root, text="Chls."   ).place(x=leftMargin+(4*width),         y=(3*rowHeight)+(2*space), width=width/2,     height=rowHeight)
         ttk.Label(root, text="DMX Gap" ).place(     x=leftMargin+(4*width),    y=(7*rowHeight)+(6*space), width=2*width/3,   height=rowHeight)
@@ -331,34 +475,30 @@ class interface:
         """-----------------------------------------------------------------------------------------------------------------------------"""
 
 
-        """ Button Objects and their position  """
-
-        ttk.Button(root, text="Start", command=self.startProgram).place(x=leftMargin+4*width,           y=(10*rowHeight)+(9*space), width=2*width/3-5, height=rowHeight)
-        ttk.Button(root, text="Pause", command=self.pauseProgram).place(x=leftMargin+4*width+2*width/3, y=(10*rowHeight)+(9*space), width=2*width/3-5, height=rowHeight)
-        ttk.Button(root, text="Stop",  command=self.stopProgram ).place(x=leftMargin+4*width+4*width/3, y=(10*rowHeight)+(9*space), width=2*width/3-5, height=rowHeight)
-        ttk.Button(root, text='Set',   command=self.setBright   ).place(x=leftMargin+(5.5*width),       y=(9*rowHeight)+(8*space),  width=width/2-5,   height=rowHeight)
-        ttk.Button(root, text="Gate",  command =self.gateControl).place(x=leftMargin+(width/2),         y=(5*rowHeight)+(4*space),  width=width/2,     height=rowHeight)
+        """ Button Objects and their position  """                                                                         
+        ttk.Button(root, text="Start", command=self.startProgram ).place(x=leftMargin+4*width,           y=(10*rowHeight)+(9*space), width=2*width/3-5, height=rowHeight)
+        ttk.Button(root, text="Pause", command=self.pauseProgram ).place(x=leftMargin+4*width+2*width/3, y=(10*rowHeight)+(9*space), width=2*width/3-5, height=rowHeight)
+        ttk.Button(root, text="Stop",  command=self.stopProgram  ).place(x=leftMargin+4*width+4*width/3, y=(10*rowHeight)+(9*space), width=2*width/3-5, height=rowHeight)
+        ttk.Button(root, text='Updt',command=self.ControlUpdate).place(x=leftMargin+3*width+width/3,   y=(10*rowHeight)+(9*space), width=2*width/3-5, height=rowHeight)
         """-----------------------------------------------------------------------------------------------------------------------------"""
 
 
         """ Checkbutton Objects and their position """
+        ttk.Checkbutton(root, variable=self.dmxVar,  command=self.DMXUpdate  ).place(x=leftMargin+(4.75*width),              y=(2*rowHeight)+(1*space), width=rowHeight, height=rowHeight)
+        ttk.Checkbutton(root, variable=self.audioVar,command=self.AudioUpdate).place(x=leftMargin+(0.75*width) ,             y=(2*rowHeight)+(1*space), width=rowHeight, height=rowHeight)
+        ttk.Checkbutton(root, variable=self.filesVar,command=self.FilesUpdate).place(x=leftMargin+(0.75*width) ,             y=(7*rowHeight)+(6*space), width=rowHeight, height=rowHeight)
+        ttk.Checkbutton(root, variable=self.htmVar,  command=self.HTMUpdate  ).place(x=leftMargin+(2*1*width)+1.25*width ,   y=(2*rowHeight)+(1*space), width=rowHeight, height=rowHeight)
+        ttk.Checkbutton(root, variable=self.plotVar, command=self.PlotUpdate ).place(x=3*leftMargin+(6*width)+450 ,          y=rowHeight              , width=rowHeight, height=rowHeight)
 
-        ttk.Checkbutton(root, variable=self.dmxVar  ).place(x=leftMargin+(4.75*width),              y=(2*rowHeight)+(1*space), width=rowHeight, height=rowHeight)
-        ttk.Checkbutton(root, variable=self.audioVar).place(x=leftMargin+(0.75*width) ,             y=(2*rowHeight)+(1*space), width=rowHeight, height=rowHeight)
-        ttk.Checkbutton(root, variable=self.filesVar).place(x=leftMargin+(0.75*width) ,             y=(7*rowHeight)+(6*space), width=rowHeight, height=rowHeight)
-        ttk.Checkbutton(root, variable=self.htmVar  ).place(x=leftMargin+(2*1*width)+1.25*width ,   y=(2*rowHeight)+(1*space), width=rowHeight, height=rowHeight)
-        ttk.Checkbutton(root, variable=self.plotVar ).place(x=leftMargin+(2*1*width)+1.25*width ,   y=(7*rowHeight)+(6*space), width=rowHeight, height=rowHeight)
-
-        ttk.Checkbutton(root, variable=self.plot1Var ).place(x=leftMargin+(2*3*width)+1.75 ,   y=(1.40*rowHeight)+(5*space), width=rowHeight, height=rowHeight)
-        ttk.Checkbutton(root, variable=self.plot2Var ).place(x=leftMargin+(2*3*width)+1.75 ,   y=(4*rowHeight)+(5*space), width=rowHeight, height=rowHeight)
-        ttk.Checkbutton(root, variable=self.plot3Var ).place(x=leftMargin+(2*3*width)+1.75 ,   y=(6.6*rowHeight)+(5*space), width=rowHeight, height=rowHeight)
-        ttk.Checkbutton(root, variable=self.plot4Var ).place(x=leftMargin+(2*3*width)+1.75 ,   y=(9.2*rowHeight)+(5*space), width=rowHeight, height=rowHeight)
+        ttk.Checkbutton(root, variable=self.plot1Var,command=self.plot1Update).place(x=2*leftMargin+(6*width) ,   y=(3*rowHeight)+(2*space), width=rowHeight, height=rowHeight)
+        ttk.Checkbutton(root, variable=self.plot2Var,command=self.plot2Update).place(x=2*leftMargin+(6*width) ,   y=(5*rowHeight)+(4*space), width=rowHeight, height=rowHeight)
+        ttk.Checkbutton(root, variable=self.plot3Var,command=self.plot3Update).place(x=2*leftMargin+(6*width) ,   y=(7*rowHeight)+(6*space), width=rowHeight, height=rowHeight)
+        ttk.Checkbutton(root, variable=self.plot4Var,command=self.plot4Update).place(x=2*leftMargin+(6*width) ,   y=(9*rowHeight)+(8*space), width=rowHeight, height=rowHeight)
 
         """-----------------------------------------------------------------------------------------------------------------------------"""
 
 
         """ OptionMenu Object """
-
         ports = glob.glob('/dev/tty.*')         
         self.serialVar = StringVar()
         omSERIALPORT = ttk.OptionMenu(root, self.serialVar, ports[0], *ports)
@@ -366,7 +506,6 @@ class interface:
         """-----------------------------------------------------------------------------------------------------------------------------"""
 
         """ Start the GUI """
-
         root.bind('<Return>', self.startProgram)
         root.protocol("WM_DELETE_WINDOW",self.on_closing)
         root.mainloop()
@@ -403,7 +542,7 @@ class Main(threading.Thread):
         global root       
         
         print 'Start MatPlotLib' 
-        plot = Plot(root, 200, NOBINS, 1, 1, 1, 1)
+        plot = Plot(root, PLOT_WIDTH, NOBINS, 1, 1, 1, 1, verbose)
 
         while START == 0:1
         
@@ -438,7 +577,7 @@ class Main(threading.Thread):
         anomaly      = [i for i in range(NOBINS)]
         likelihood   = anomaly
         anomalyAv    = 0.5
-        likelihoodAv = 0.5 #Range expanded and clipped for DMX Lighting reasons!
+        likelihoodAv = 0.5 #Range expanded and clipped for DMX Lighting !
         
 
         """ Create DMX object, start thread outputs messages from a buffer"""  
@@ -450,19 +589,8 @@ class Main(threading.Thread):
 
         """ Initialise the plots, BUFFERSIZE is the width of the plot. """
         if PLOT:
-            #print 'Start MatPlotLib' 
-            #plot = Plot(root, 200, NOBINS, 1, 1, 1, 1)
-            if PLOT_1:
-                plot.PLOT_A = 1
-
-            if PLOT_2:
-                plot.PLOT_B = 1 
-            
-            if PLOT_3:
-                plot.PLOT_C = 1
-
-            if PLOT_4:
-                plot.PLOT_D = 1     
+            plot.start()
+            plot.size = NOBINS
             """-----------------------------------------------------------------------------------------------------------------------------"""          
             
 
@@ -471,8 +599,7 @@ class Main(threading.Thread):
         """
         MODEL_RUN   = 1
         startTime   = time.time()
-        elapsed     = startTime
-        
+        elapsed     = startTime      
         
 
         while MODEL_RUN:  
@@ -489,11 +616,11 @@ class Main(threading.Thread):
                     """ WAV FILES - Play a number of wav files sorted corresponding to the anomaly value """
 
                     if FILES:
-                        if time.time()-elapsed > WAV_MINUTES*60:                        
-                            print 'Audio for Anomaly: ' + str(anomalyAv) 
+                        if time.time()-elapsed > WAV_MINUTES*60: 
                             wavFiles[int(anomalyAv*(len(wavFiles)-1))].play = 1
-
                             elapsed = time.time()
+                            if verbose:
+                                print 'Audio for Anomaly: ' + str(anomalyAv) 
                     """---------------------------------------------------------------------------------------"""
 
                     """ NUPIC MODEL - Run the NuPIC model and get the anomaly score back. Feed on bin only."""
@@ -541,7 +668,7 @@ class Main(threading.Thread):
                             dmx.VALUES = anomaly                            
                             #dmx.VALUES = int(likelihoodAv*300 -50)#CHANGE OR ADD self.anomalyLikelihood
                         # Cycle the colour values of the DMX channels, keeping their RGB proportion, and cycling through 255 steps
-                        dmx.CYCLE += 1
+                        #dmx.CYCLE += 1###############################
                         if(dmx.CYCLE > 255):
                             dmx.CYCLE = 0
 
@@ -550,7 +677,7 @@ class Main(threading.Thread):
                             #dmx.VALUES = int(audioObject.ys[10])# Send the audio value as DMX
                             dmx.VALUES = random.randint(0,1)
                         else:
-                            dmx.VALUES = 0
+                            dmx.VALUES = 0  ########## REVISE THIS AS THIS CYCLE VARIABLE MIGHT BE UNUSED
                         CYCLE += 1
                         if(CYCLE > 255):
                             CYCLE = 0
@@ -586,35 +713,35 @@ class Main(threading.Thread):
                     print 'Stop - Exception - Keyboard Interrupt'
                     pass
 
-                # except Exception, err:
-                #     MODEL_RUN  = 0
-                #     print 'Stop - Exception - Error'
-                #     print err
-                #     pass
+                except Exception, err:
+                    MODEL_RUN  = 0
+                    print 'Stop - Exception - Error'
+                    print err
+                    pass
                 
         
         if PLOT:
-            plot.PLOT        = 0         #Visualisations 
-            plot.join()
+            plot.PLOT        = 0                # Visualisations 
+            plot.join()                         # Join to main thread
 
         if HTM:
             for i in range(NOBINS):
-                nupicObject[i].HTM = 0
+                nupicObject[i].HTM = 0          # HTM Models
             [nupicObject[i].join() for i in range(NOBINS)]                
 
         if AUDIO:
-            audioObject.inStream.stop_stream()  #PyAudio
-            audioObject.inStream.close()        #PyAudio 
+            audioObject.inStream.stop_stream()  # PyAudio
+            audioObject.inStream.close()        # Join to main thread 
 
         if FILES:
             for i in range(len(wavFiles)):
-                wavFiles[i].FILES = 0
+                wavFiles[i].FILES = 0           # WAV Files
             [wavFiles[i].close() for i in range(len(wavFiles))]
             [wavFiles[i].join()  for i in range(len(wavFiles))]
 
         if DMX:
-            dmx.DMX               = 0          #Serial
-            dmx.join()                         #Serial
+            dmx.DMX               = 0           # Serial
+            dmx.join()                          # Join to main thread
                                                                       
         print("Exit PyAudio, Matplotlib & Serial")
         sys.exit()                                                                                  
