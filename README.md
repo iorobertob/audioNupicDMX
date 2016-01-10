@@ -3,11 +3,11 @@
 # audioNupicDMX
 -- AND_9 breaks the project into several class files
 
-This work takes Audio from a Microphone, processes it with a Machine Learning algorithm in such way that Anomalies are detected in the sound. This anomalies are used to generate one single, or several values, ranging between 0 and 255 to send over a DMX bus in order to control lights on a custom fashion. The system is programmed in Python, and it uses version 2.7 specifically. 
+This work takes Audio from a Microphone, processes it with a Machine Learning algorithm in such way that Anomalies are detected in the sound. This anomalies are used to control DMX fxitures's colours brighness. It also reproduces WAV files in accordance to such Anomalies. The system is programmed in Python, and it uses version 2.7 specifically. 
 
 Anomaly, referring to some values of the sound input that divert from what has been expected, or normal. 
 
-The Machine Learning algorithm used is a Hierarchical Temporal Memory (HTM) implemented in the project called NuPIC, from Numenta. This is an open source project found in this respository. [NuPIC](https://github.com/numenta/nupic) is the state of the art in computer models of the human brain, designed to work in the same way the Neocortex does. More about this in the NuPIC section. 
+The Machine Learning algorithm used is a Hierarchical Temporal Memory (HTM) implemented in the project called NuPIC, from Numenta. This is an open source project found in this respository. [NuPIC](https://github.com/numenta/nupic) is the state of the art in computer models of the human brain, designed to work in the same way the Neocortex does.
 
 The inspiration for this comes from a work by artist/cybernitician Gordon Pask called Musicolour, which took audio and gave visual output playing with concepts like learning machines, memory elements, repetitive input, and the reaction of the system to such repetitions, growing less reactive to repetition than to novel input. All this being analogue and here ported to contemporary digital technology and current machine learning systems. 
 
@@ -20,9 +20,9 @@ $ ./_install.sh
 
 this should install all dependencies, clone this respository and set go into that folder with the terminal. 
 
-After that the main file AND_6.py can be called with:
+After that the main file AND_96.py can be called with:
 
-$ python AND_6.py
+$ python AND_96.py
 
 ## hardware Requirements
 
